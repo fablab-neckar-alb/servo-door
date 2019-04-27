@@ -90,7 +90,7 @@ module housing_mittig(){
 }
 	
 
-
+pitch = 200;
 
 function servoGearInnerRadius() = 63;
 function servoGearOuterRadius() = 66;
@@ -105,19 +105,27 @@ module wheel()
 
 
 //translate([35,-0,-20])import("original_gear.stl");
-difference(){
-    union(){
-       translate([0,0,17])rotate([0,0,360/61*$t])linear_extrude(5)gear(number_of_teeth=67, circular_pitch=pitch,flat=true);
-        cylinder(d=64,h=22);
+    difference()
+    {
+        union()
+        {
+            difference(){
+                union(){
+                   translate([0,0,21])rotate([0,0,360/61*$t])linear_extrude(5)gear(number_of_teeth=67, circular_pitch=pitch,flat=true);
+                    translate([0,0,11])cylinder(d=64,h=12);
+                }
+                
+                cylinder(d=62.01,h=20);
+                
+            }
+        translate([0,0,11])cylinder(d=27,h=10);
+        }
+        cube([3,30,100],center=true);
+        
     }
-    
-    cylinder(d=62.01,h=20);
-    
-}
-cylinder(d=33,h=20);
-}
 
-pitch = 200;
+
+}
 
 
 module holder(){
@@ -154,7 +162,7 @@ difference(){
        cylinder(d=3, h=100);
        translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
    }
-   #translate([30,32,-14])
+   translate([30,32,-14])
    { 
        cylinder(d=3, h=100);
        translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
@@ -166,13 +174,55 @@ difference(){
    }
 }
 }
-//translate([44.5,0,35]){rotate([0,0,-360/13*$t])linear_extrude(5){gear(number_of_teeth=13, circular_pitch=pitch,flat=true);}}
+
+
+
+{
+    translate([44.5,0,26])
+    {
+        difference()
+        {
+            union()
+            {
+                linear_extrude(7)
+                {
+                    difference()
+                    {
+                        union()
+                        {
+                            gear(number_of_teeth=13, circular_pitch=pitch,flat=true);
+                            circle(d=6);
+                        }
+                        circle(d=3);
+                    }
+                    
+                }
+                translate([0,0,7])cylinder(d=30,h=1);
+
+                translate([0,0,7]) rotate_extrude(convexity = 10) translate([14, 0, 0])
+                {
+                    circle(r = 1);
+                }
+            }
+            translate([0,0,-2])cylinder(d=6,h=5);
+            #translate([0,0,7])cylinder(d=6,h=5);
+        cylinder(d=3,h=10);
+        }
+    }
+
 //translate([0,0,13])
+//projection(cut=true)
+{
+    //rotate([90,0,0])
+    {
 difference()
 {
     holder();
-    translate([-1,-1,-2]*5000)cube(10000);
+ //   translate([-1,-1,-2]*5000)cube(10000);
 }
 //translate([0,0,10])
-//translate([0,0,18])wheel();
-//translate([44.5,0,-doorshieldheight])rotate([0,0,90])servo(model=true); 
+translate([0,0,5])wheel();
+        }
+translate([44.5,0,-doorshieldheight])rotate([0,0,90])servo(model=true); 
+}
+}
