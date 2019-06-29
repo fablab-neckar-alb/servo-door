@@ -176,6 +176,7 @@ difference(){
 }
 }
 
+
 module servowheel()
 {
    difference()
@@ -218,7 +219,7 @@ module servowheel()
     {
 difference()
 {
-    holder();
+  //  holder();
  //   translate([-1,-1,-2]*5000)cube(10000);
 }
 //translate([0,0,10])
