@@ -6,14 +6,20 @@ doorshieldheight=10;
 doorcylinderaddition=5;
 keyaddition=40;
 
+// measurements: topscrew-bottomscrew = 113, topscrew-cylinder = 50, door-screwbase = 7.5
+screw_pos = [[0,50],[0,50-113]];
+screw_r = 6/2;
+// screw_head_r = 12/2;
+// screw_l = 57;
+// distance lock-baseplane: 6.2 (that should be baseplateheight)
+//   however: the rest of the geometry does not depend on baseplateheight yet...
 
 
-	include <MCAD/units.scad>
 use <MCAD/involute_gears.scad>
 
 $fn = 60;
 module schliesszylinder(h = 10){
-	lenght = 33;
+	length = 33;
 	slotwidth = 10;
 	keycylinderwidth = 17;
 	cylinder(d=keycylinderwidth,h);
@@ -94,7 +100,6 @@ pitch = 200;
 
 function servoGearInnerRadius() = 63;
 function servoGearOuterRadius() = 66;
-use <MCAD/involute_gears.scad>
 
 module wheel()
 {
@@ -133,7 +138,14 @@ difference(){
     baseplateheight=3;
 	union(){
 		//cylinder(d=62,h=3);
-        translate([0,0,baseplateheight/2])cube([32*2,50,baseplateheight],center=true);
+        //#translate([0,0,baseplateheight/2])cube([32*2,50,baseplateheight],center=true);
+        linear_extrude(height=baseplateheight) hull() {
+          square([32*2,50],center=true);
+          for (p = screw_pos) {
+            translate(-p)
+              circle(r=3*screw_r+baseplateheight);
+          }
+        }
         translate([45/2,-18.2,-10])cube([32,55,baseplateheight+10]);
         translate([-(45/2)-10,-25,-10])cube([10,50,13]);
         cylinder(d=43,h=4);
@@ -172,11 +184,17 @@ difference(){
        cylinder(d=3, h=100);
        translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
    }
+   // holes for the screws of the actual lock.
+   for (p = screw_pos) {
+     translate([-p[0],-p[1],-0.01])
+       cylinder(r1=screw_r, r2=screw_r+baseplateheight, h=baseplateheight+0.02);
+//       cylinder(r=screw_r, h=baseplateheight+2);
+   }
 }
 }
 
 
-gear()
+//gear()
 {
     translate([44.5,0,26])
     {
@@ -217,7 +235,7 @@ gear()
     {
 difference()
 {
-  //  holder();
+    holder();
  //   translate([-1,-1,-2]*5000)cube(10000);
 }
 //translate([0,0,10])
