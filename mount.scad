@@ -1,7 +1,8 @@
-servohalterhoehe = 25;
+servohalterhoehe = 24;
 servohalterueberstand = 8;
 haltebackuntenbiszahnkranzoben = 16.8;
 
+plattendicke=4;
 doorshieldheight=10;
 doorcylinderaddition=5;
 keyaddition=40;
@@ -146,7 +147,7 @@ difference(){
               circle(r=3*screw_r+baseplateheight);
           }
         }
-        translate([45/2,-18.2,-10])cube([32,55,baseplateheight+10]);
+        #translate([45/2,-25,-10])cube([32,62.3,baseplateheight+10]);
         translate([-(45/2)-10,-25,-10])cube([10,50,13]);
         cylinder(d=43,h=4);
 		//translate([-19,20,0]) cube([56,25,25]);	
@@ -163,18 +164,18 @@ difference(){
 
 	translate([-0,0,-.1])schliesszylinder(5.1);
 	translate([44.5,0,-30])rotate([0,0,90])servo(true); 
-
+   
    translate([-28,-20,-14])
    { 
        cylinder(d=3, h=100);
        translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
    }
-   translate([30,-13,-14])
+   translate([30,-20,-14])
    { 
        cylinder(d=3, h=100);
        translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
    }
-   translate([30,32,-14])
+   translate([30,20,-14])
    { 
        cylinder(d=3, h=100);
        translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
@@ -194,39 +195,40 @@ difference(){
 }
 
 
-//gear()
+module servowheel()
 {
-    translate([44.5,0,26])
+   difference()
     {
-        difference()
+        union()
         {
-            union()
+            linear_extrude(7)
             {
-                linear_extrude(7)
+                difference()
                 {
-                    difference()
+                    union()
                     {
-                        union()
-                        {
-                            gear(number_of_teeth=13, circular_pitch=pitch,flat=true);
-                            circle(d=6);
-                        }
-                        circle(d=3);
+                        gear(number_of_teeth=13, circular_pitch=pitch,flat=true);
+                        circle(d=6);
                     }
-                    
+                    circle(d=3);
                 }
-                translate([0,0,7])cylinder(d=30,h=1);
-
-                translate([0,0,7]) rotate_extrude(convexity = 10) translate([14, 0, 0])
-                {
-                    circle(r = 1);
-                }
+                
             }
-            translate([0,0,-2])cylinder(d=6,h=5);
-            #translate([0,0,7])cylinder(d=6,h=5);
-        cylinder(d=3,h=10);
+            translate([0,0,7])cylinder(d=30,h=1);
+
+            translate([0,0,7]) rotate_extrude(convexity = 10) translate([14, 0, 0])
+            {
+                circle(r = 1);
+            }
         }
+        translate([0,0,-2])cylinder(d=6,h=5);
+        translate([0,0,7])cylinder(d=8,h=5);
+    cylinder(d=3,h=10);
     }
+}
+
+{
+    //translate([44.5,0,26]) servowheel();
 
 //translate([0,0,13])
 //projection(cut=true)
