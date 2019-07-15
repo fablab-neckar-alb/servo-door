@@ -19,6 +19,7 @@ screw_r = 6/2;
 use <MCAD/involute_gears.scad>
 
 $fn = 60;
+
 module schliesszylinder(h = 10){
 	length = 33;
 	slotwidth = 10;
@@ -29,6 +30,21 @@ module schliesszylinder(h = 10){
 		cylinder(d=10.1,h);
 	}
 }
+
+servo_axis_star_rs = [5.5/2,5.7/2]; // [5.6/2, 5.7/2]
+servo_axis_star_N = 23;
+
+module servo_axis() {
+  N = servo_axis_star_N;
+  rs = servo_axis_star_rs;
+  r1 = rs[0];
+  r2 = rs[1];
+  a = 180/N;
+  star = [for (i=[0:N-1],j=[0,1]) rs[j]*[cos(a*(2*i+j)),sin(a*(2*i+j))]];
+  polygon(points=star);
+}
+
+
 module servo(cutout = false, holdblock=false,model=false) {
     mitteX = 10.2;
     mitteY = 10;
@@ -86,12 +102,14 @@ module servo(cutout = false, holdblock=false,model=false) {
 	}
 	color("white") translate([0,0,10+servohalterhoehe]) {
 		difference() {
-			cylinder(d=6, h=3+1);
+			//cylinder(d=6, h=3+1);
+                        linear_extrude(height=3+1) servo_axis();
 			translate([0,0,1]) cylinder(d=2, h=4);
 		}
 	}
 	}
 }
+
 module housing_mittig(){
 	rotate([0,0,270])translate([200,-120])import("keylock-housing.stl");
 }
@@ -203,15 +221,7 @@ module servowheel()
         {
             linear_extrude(7)
             {
-                difference()
-                {
-                    union()
-                    {
-                        gear(number_of_teeth=13, circular_pitch=pitch,flat=true);
-                        circle(d=6);
-                    }
-                    circle(d=3);
-                }
+              gear(number_of_teeth=13, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
                 
             }
             translate([0,0,7])cylinder(d=30,h=1);
@@ -221,10 +231,39 @@ module servowheel()
                 circle(r = 1);
             }
         }
-        translate([0,0,-2])cylinder(d=6,h=5);
+        //#translate([0,0,-2])cylinder(d=6,h=5);
         translate([0,0,7])cylinder(d=8,h=5);
-    cylinder(d=3,h=10);
+        cylinder(d=3,h=10);
+        translate([0,0,-2])linear_extrude(height=5) servo_axis();
     }
+}
+module servowheel_2D(layer=0) {
+  if (layer == 0) {
+    difference() {
+      gear(number_of_teeth=13, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
+      servo_axis();
+    }
+  } else {
+    difference() {
+      circle(d=30);
+      circle(d=3);
+    }
+  }
+}
+*union() {
+  translate([0,30.5])
+    servowheel();
+  for (l=[0:1])
+    translate([0,0,l*3])
+      linear_extrude(height=3)
+        servowheel_2D(layer=l);
+}  
+*offset(r=0.095) {
+  union() {
+    for (l=[0:1])
+      translate([l*30.5,0])
+        servowheel_2D(layer=l);
+  }
 }
 
 {
