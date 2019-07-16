@@ -7,14 +7,21 @@ doorshieldheight=10;
 doorcylinderaddition=5;
 keyaddition=40;
 
+// measurements: topscrew-bottomscrew = 113, topscrew-cylinder = 50, door-screwbase = 7.5
+screw_pos = [[0,50],[0,50-113]];
+screw_r = 6/2;
+// screw_head_r = 12/2;
+// screw_l = 57;
+// distance lock-baseplane: 6.2 (that should be baseplateheight)
+//   however: the rest of the geometry does not depend on baseplateheight yet...
 
 
-	include <MCAD/units.scad>
 use <MCAD/involute_gears.scad>
 
 $fn = 60;
+
 module schliesszylinder(h = 10){
-	lenght = 33;
+	length = 33;
 	slotwidth = 10;
 	keycylinderwidth = 17;
 	cylinder(d=keycylinderwidth,h);
@@ -23,6 +30,21 @@ module schliesszylinder(h = 10){
 		cylinder(d=10.1,h);
 	}
 }
+
+servo_axis_star_rs = [5.5/2,5.7/2]; // [5.6/2, 5.7/2]
+servo_axis_star_N = 23;
+
+module servo_axis() {
+  N = servo_axis_star_N;
+  rs = servo_axis_star_rs;
+  r1 = rs[0];
+  r2 = rs[1];
+  a = 180/N;
+  star = [for (i=[0:N-1],j=[0,1]) rs[j]*[cos(a*(2*i+j)),sin(a*(2*i+j))]];
+  polygon(points=star);
+}
+
+
 module servo(cutout = false, holdblock=false,model=false) {
     mitteX = 10.2;
     mitteY = 10;
@@ -80,12 +102,14 @@ module servo(cutout = false, holdblock=false,model=false) {
 	}
 	color("white") translate([0,0,10+servohalterhoehe]) {
 		difference() {
-			cylinder(d=6, h=3+1);
+			//cylinder(d=6, h=3+1);
+                        linear_extrude(height=3+1) servo_axis();
 			translate([0,0,1]) cylinder(d=2, h=4);
 		}
 	}
 	}
 }
+
 module housing_mittig(){
 	rotate([0,0,270])translate([200,-120])import("keylock-housing.stl");
 }
@@ -95,7 +119,6 @@ pitch = 200;
 
 function servoGearInnerRadius() = 63;
 function servoGearOuterRadius() = 66;
-use <MCAD/involute_gears.scad>
 
 module wheel()
 {
@@ -134,7 +157,14 @@ difference(){
     baseplateheight=3;
 	union(){
 		//cylinder(d=62,h=3);
-        translate([0,0,baseplateheight/2])cube([32*2,50,baseplateheight],center=true);
+        //#translate([0,0,baseplateheight/2])cube([32*2,50,baseplateheight],center=true);
+        linear_extrude(height=baseplateheight) hull() {
+          square([32*2,50],center=true);
+          for (p = screw_pos) {
+            translate(-p)
+              circle(r=3*screw_r+baseplateheight);
+          }
+        }
         #translate([45/2,-25,-10])cube([32,62.3,baseplateheight+10]);
         translate([-(45/2)-10,-25,-10])cube([10,50,13]);
         cylinder(d=43,h=4);
@@ -173,6 +203,12 @@ difference(){
        cylinder(d=3, h=100);
        translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
    }
+   // holes for the screws of the actual lock.
+   for (p = screw_pos) {
+     translate([-p[0],-p[1],-0.01])
+       cylinder(r1=screw_r, r2=screw_r+baseplateheight, h=baseplateheight+0.02);
+//       cylinder(r=screw_r, h=baseplateheight+2);
+   }
 }
 }
 
@@ -185,15 +221,7 @@ module servowheel()
         {
             linear_extrude(7)
             {
-                difference()
-                {
-                    union()
-                    {
-                        gear(number_of_teeth=13, circular_pitch=pitch,flat=true);
-                        circle(d=6);
-                    }
-                    circle(d=3);
-                }
+              gear(number_of_teeth=13, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
                 
             }
             translate([0,0,7])cylinder(d=30,h=1);
@@ -203,10 +231,39 @@ module servowheel()
                 circle(r = 1);
             }
         }
-        translate([0,0,-2])cylinder(d=6,h=5);
+        //#translate([0,0,-2])cylinder(d=6,h=5);
         translate([0,0,7])cylinder(d=8,h=5);
-    cylinder(d=3,h=10);
+        cylinder(d=3,h=10);
+        translate([0,0,-2])linear_extrude(height=5) servo_axis();
     }
+}
+module servowheel_2D(layer=0) {
+  if (layer == 0) {
+    difference() {
+      gear(number_of_teeth=13, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
+      servo_axis();
+    }
+  } else {
+    difference() {
+      circle(d=30);
+      circle(d=3);
+    }
+  }
+}
+*union() {
+  translate([0,30.5])
+    servowheel();
+  for (l=[0:1])
+    translate([0,0,l*3])
+      linear_extrude(height=3)
+        servowheel_2D(layer=l);
+}  
+*offset(r=0.095) {
+  union() {
+    for (l=[0:1])
+      translate([l*30.5,0])
+        servowheel_2D(layer=l);
+  }
 }
 
 {
@@ -219,7 +276,7 @@ module servowheel()
     {
 difference()
 {
-  //  holder();
+    holder();
  //   translate([-1,-1,-2]*5000)cube(10000);
 }
 //translate([0,0,10])
