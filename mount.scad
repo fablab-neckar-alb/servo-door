@@ -234,7 +234,10 @@ module servowheel()
         //#translate([0,0,-2])cylinder(d=6,h=5);
         translate([0,0,7])cylinder(d=8,h=5);
         cylinder(d=3,h=10);
-        translate([0,0,-2])linear_extrude(height=5) servo_axis();
+        translate([0,0,-2])
+          linear_extrude(height=5)
+           offset(r=0.25) // clearance for fitting
+             servo_axis();
     }
 }
 module servowheel_2D(layer=0) {
