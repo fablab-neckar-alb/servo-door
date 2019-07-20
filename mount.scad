@@ -165,9 +165,9 @@ difference(){
               circle(r=3*screw_r+baseplateheight);
           }
         }
-        #translate([45/2,-25,-10])cube([32,62.3,baseplateheight+10]);
+        translate([45/2,-25,-10])cube([32,62.3,baseplateheight+10]);
         translate([-(45/2)-10,-25,-10])cube([10,50,13]);
-        cylinder(d=43,h=4);
+        cylinder(d=43,h=7);
 		//translate([-19,20,0]) cube([56,25,25]);	
         cylinder(d=35,24);
         translate([44.5,0,-10])rotate([0,0,90])servo(holdblock=true); 
@@ -182,27 +182,6 @@ difference(){
 
 	translate([-0,0,-.1])schliesszylinder(5.1);
 	translate([44.5,0,-30])rotate([0,0,90])servo(true); 
-   
-   translate([-28,-20,-14])
-   { 
-       cylinder(d=3, h=100);
-       translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
-   }
-   translate([30,-20,-14])
-   { 
-       cylinder(d=3, h=100);
-       translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
-   }
-   translate([30,20,-14])
-   { 
-       cylinder(d=3, h=100);
-       translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
-   }
-   translate([-28,20,-14])
-   { 
-       cylinder(d=3, h=100);
-       translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
-   }
    // holes for the screws of the actual lock.
    for (p = screw_pos) {
      translate([-p[0],-p[1],-0.01])
