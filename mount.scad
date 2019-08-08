@@ -134,9 +134,9 @@ difference(){
     baseplateheight=3;
 	union(){
 		//cylinder(d=62,h=3);
-        translate([0,0,baseplateheight/2])cube([32*2,50,baseplateheight],center=true);
-        #translate([45/2,-25,-10])cube([32,62.3,baseplateheight+10]);
-        translate([-(45/2)-10,-25,-10])cube([10,50,13]);
+        translate([0,8,baseplateheight/2])cube([27*2,130,baseplateheight],center=true);
+        #translate([45/2,-57,-10])cube([12.1,130,baseplateheight+10]);
+        translate([-(45/2)-5,-57,-10])cube([5,130,13]);
         cylinder(d=43,h=4);
 		//translate([-19,20,0]) cube([56,25,25]);	
         cylinder(d=35,24);
@@ -153,25 +153,16 @@ difference(){
 	translate([-0,0,-.1])schliesszylinder(5.1);
 	translate([44.5,0,-30])rotate([0,0,90])servo(true); 
    
-   translate([-28,-20,-14])
+
+   #translate([0,-50,-14])
    { 
-       cylinder(d=3, h=100);
-       translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
+       cylinder(d=6, h=100);
+       translate([0,0,14]) cylinder(d1=6,d2=12, h=3);
    }
-   translate([30,-20,-14])
+   #translate([0,65,-14])
    { 
-       cylinder(d=3, h=100);
-       translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
-   }
-   translate([30,20,-14])
-   { 
-       cylinder(d=3, h=100);
-       translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
-   }
-   translate([-28,20,-14])
-   { 
-       cylinder(d=3, h=100);
-       translate([0,0,14]) cylinder(d1=3,d2=6, h=3);
+       cylinder(d=6, h=100);
+       translate([0,0,14]) cylinder(d1=6,d2=12, h=3);
    }
 }
 }
@@ -183,34 +174,38 @@ module servowheel()
     {
         union()
         {
-            linear_extrude(7)
+            linear_extrude(5)
             {
                 difference()
                 {
                     union()
                     {
                         gear(number_of_teeth=13, circular_pitch=pitch,flat=true);
-                        circle(d=6);
+                        
                     }
-                    circle(d=3);
+                    circle(d=10);
                 }
                 
             }
-            translate([0,0,7])cylinder(d=30,h=1);
+            translate([0,0,5])cylinder(d=32,h=1);
 
-            translate([0,0,7]) rotate_extrude(convexity = 10) translate([14, 0, 0])
+            translate([0,0,5]) rotate_extrude(convexity = 10) translate([16, 0, 0])
             {
                 circle(r = 1);
             }
         }
-        translate([0,0,-2])cylinder(d=6,h=5);
-        translate([0,0,7])cylinder(d=8,h=5);
-    cylinder(d=3,h=10);
+        
+        translate([0,12,0])cylinder(d=3,h=20);
+        translate([0,-12,0])cylinder(d=3,h=20);
+        cylinder(d=10,h=10);
+        translate([0,0,5])cylinder(d=10,d2=16,h=1.2);
     }
 }
 
+
+!servowheel();
 {
-    //translate([44.5,0,26]) servowheel();
+    translate([44.5,0,26]) servowheel();
 
 //translate([0,0,13])
 //projection(cut=true)
@@ -219,7 +214,7 @@ module servowheel()
     {
 difference()
 {
-  //  holder();
+    //holder();
  //   translate([-1,-1,-2]*5000)cube(10000);
 }
 //translate([0,0,10])
