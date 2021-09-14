@@ -249,7 +249,7 @@ module servowheel_2D(layer=0) {
 }
 
 
-!servowheel();
+//!servowheel();
 {
     translate([44.5,0,26]) servowheel();
 
@@ -264,8 +264,8 @@ difference()
  //   translate([-1,-1,-2]*5000)cube(10000);
 }
 //translate([0,0,10])
-//translate([0,0,5])wheel();
+%translate([0,0,5])wheel();
         }
-//translate([44.5,0,-doorshieldheight])rotate([0,0,90])servo(model=true); 
+%translate([44.5,0,-doorshieldheight])rotate([0,0,90])servo(model=true); 
 }
 }
