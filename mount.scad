@@ -1,3 +1,10 @@
+build_part = undef; // use openscad -D build_part=\"parts_list\" ...
+// build_part = "parts_list";
+// build_part = "servowheel";
+// build_part = "servowheel_2D";
+// build_part = "holder";
+// build_part = "wheel";
+
 servohalterhoehe = 24;
 servohalterueberstand = 8;
 haltebackuntenbiszahnkranzoben = 16.8;
@@ -27,6 +34,15 @@ use <MCAD/involute_gears.scad>
 
 $fn = 60;
 
+module part(s="") {
+  if (build_part == s) children();
+  if (build_part == "parts_list") echo(str("PART: ",s));
+}
+
+module demo() {
+  if (build_part == undef) children();
+}
+
 module schliesszylinder(h = 10){
 	length = 33;
 	slotwidth = 10;
@@ -51,7 +67,6 @@ module servo_axis() {
   polygon(points=star);
 }
 
-
 module servo(cutout = false, holdblock=false,model=false) {
     mitteX = 10.2;
     mitteY = 10;
@@ -59,7 +74,7 @@ module servo(cutout = false, holdblock=false,model=false) {
     servoY = 20;
     servolaenge = 39.5;
     servohalterlaenge = servolaenge+2*servohalterueberstand;
-    
+
 	if(cutout)
 	{
 		translate([-mitteX,-mitteY-1,0]) cube([39.5,21,100]);
@@ -88,7 +103,7 @@ module servo(cutout = false, holdblock=false,model=false) {
 	color("blue") difference() {
 		union() {
 
-            
+
             mitteY = 10;
 			translate([-10.2,-10,0]) cube([servolaenge,20,(34.3-25)+servohalterhoehe]);
 			difference(){
@@ -120,9 +135,15 @@ module servo(cutout = false, holdblock=false,model=false) {
 module housing_mittig(){
 	rotate([0,0,270])translate([200,-120])import("keylock-housing.stl");
 }
-	
 
-//pitch = 200;
+module bearing() {
+  // note: sizes not measured, but inferred from actual parts.
+  color([0.2,0.2,0.2])
+    linear_extrude(height=20-7+5) difference() {
+      circle(d=62.01);
+      circle(d=35);
+    }
+}
 
 function servoGearInnerRadius() = 63;
 function servoGearOuterRadius() = 66;
@@ -145,14 +166,14 @@ module wheel()
                    translate([0,0,21])rotate([0,0,360/61*$t])linear_extrude(5)gear(number_of_teeth=gears_n2, circular_pitch=pitch,flat=true);
                     translate([0,0,11])cylinder(d=64,h=12);
                 }
-                
+
                 cylinder(d=62.01,h=20);
-                
+
             }
         translate([0,0,11])cylinder(d=27,h=10);
         }
         cube([3,30,100],center=true);
-        
+
     }
 
 
@@ -188,7 +209,7 @@ difference(){
 	translate([-0,0,3]) cylinder(d=30,22);
 
 	translate([-0,0,-.1])schliesszylinder(5.1);
-	translate(servo_pos+[0,0,-30])rotate([0,0,90])servo(true); 
+	translate(servo_pos+[0,0,-30])rotate([0,0,90])servo(true);
    // holes for the screws of the actual lock.
    for (p = screw_pos) {
      translate([-p[0],-p[1],-0.01])
@@ -197,7 +218,6 @@ difference(){
    }
 }
 }
-
 
 module servowheel()
 {
@@ -208,7 +228,7 @@ module servowheel()
             linear_extrude(5)
             {
               gear(number_of_teeth=gears_n1, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
-                
+
             }
             translate([0,0,5])cylinder(d=32,h=1);
 
@@ -226,6 +246,7 @@ module servowheel()
              servo_axis();
     }
 }
+
 module servowheel_2D(layer=0) {
   if (layer == 0) {
     difference() {
@@ -239,15 +260,10 @@ module servowheel_2D(layer=0) {
     }
   }
 }
-*union() {
-  translate([0,30.5])
-    servowheel();
-  for (l=[0:1])
-    translate([0,0,l*3])
-      linear_extrude(height=3)
-        servowheel_2D(layer=l);
-}  
-*offset(r=0.095) {
+
+part("servowheel") translate([0,0,6]) rotate([180,0,0]) servowheel();
+
+part("servowheel_2D") offset(r=0.095) {
   union() {
     for (l=[0:1])
       translate([l*30.5,0])
@@ -255,24 +271,26 @@ module servowheel_2D(layer=0) {
   }
 }
 
+part("holder") holder();
+part("wheel") translate([0,0,26]) rotate([180,0,0]) wheel();
 
-//!servowheel();
-{
-    translate(servo_pos+[0,0,26]) servowheel();
-
-//translate([0,0,13])
-//projection(cut=true)
-{
-    //rotate([90,0,0])
-    {
-difference()
-{
-    holder();
- //   translate([-1,-1,-2]*5000)cube(10000);
-}
-//translate([0,0,10])
-%translate([0,0,5])wheel();
-        }
-%translate(servo_pos+[0,0,-doorshieldheight])rotate([0,0,90])servo(model=true); 
-}
+demo() {
+  translate(servo_pos+[0,0,26]) {
+    servowheel();
+    translate([0,-40,0])
+      for (l=[0:1])
+        translate([0,0,l*3])
+          linear_extrude(height=3)
+            servowheel_2D(layer=l);
+  }
+  difference()
+  {
+      holder();
+   //   translate([-1,-1,-2]*5000)cube(10000);
+  }
+  translate([0,0,5])
+    wheel();
+  translate([0,0,7])
+    bearing();
+  %translate(servo_pos+[0,0,-doorshieldheight])rotate([0,0,90])servo(model=true);
 }
