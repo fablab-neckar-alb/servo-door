@@ -15,6 +15,13 @@ screw_r = 6/2;
 // distance lock-baseplane: 6.2 (that should be baseplateheight)
 //   however: the rest of the geometry does not depend on baseplateheight yet...
 
+servo_pos = [44.5,0,0]; // z-pos is zero on purpose (also different in every instance...)
+
+gears_n1 = 13;
+gears_n2 = 67;
+gears_d = norm(servo_pos);
+modulus = gears_d*2/(gears_n1+gears_n2);
+pitch = 180*modulus;
 
 use <MCAD/involute_gears.scad>
 
@@ -115,7 +122,7 @@ module housing_mittig(){
 }
 	
 
-pitch = 200;
+//pitch = 200;
 
 function servoGearInnerRadius() = 63;
 function servoGearOuterRadius() = 66;
@@ -135,7 +142,7 @@ module wheel()
         {
             difference(){
                 union(){
-                   translate([0,0,21])rotate([0,0,360/61*$t])linear_extrude(5)gear(number_of_teeth=67, circular_pitch=pitch,flat=true);
+                   translate([0,0,21])rotate([0,0,360/61*$t])linear_extrude(5)gear(number_of_teeth=gears_n2, circular_pitch=pitch,flat=true);
                     translate([0,0,11])cylinder(d=64,h=12);
                 }
                 
@@ -170,7 +177,7 @@ difference(){
         cylinder(d=43,h=7);
 		//translate([-19,20,0]) cube([56,25,25]);	
         cylinder(d=35,24);
-        translate([44.5,0,-10])rotate([0,0,90])servo(holdblock=true); 
+        translate(servo_pos+[0,0,-10])rotate([0,0,90])servo(holdblock=true); 
 	}
     /*translate([0,0,3.001])
     difference()
@@ -181,7 +188,7 @@ difference(){
 	translate([-0,0,3]) cylinder(d=30,22);
 
 	translate([-0,0,-.1])schliesszylinder(5.1);
-	translate([44.5,0,-30])rotate([0,0,90])servo(true); 
+	translate(servo_pos+[0,0,-30])rotate([0,0,90])servo(true); 
    // holes for the screws of the actual lock.
    for (p = screw_pos) {
      translate([-p[0],-p[1],-0.01])
@@ -200,7 +207,7 @@ module servowheel()
         {
             linear_extrude(5)
             {
-              gear(number_of_teeth=13, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
+              gear(number_of_teeth=gears_n1, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
                 
             }
             translate([0,0,5])cylinder(d=32,h=1);
@@ -222,7 +229,7 @@ module servowheel()
 module servowheel_2D(layer=0) {
   if (layer == 0) {
     difference() {
-      gear(number_of_teeth=13, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
+      gear(number_of_teeth=gears_n1, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
       servo_axis();
     }
   } else {
@@ -251,7 +258,7 @@ module servowheel_2D(layer=0) {
 
 //!servowheel();
 {
-    translate([44.5,0,26]) servowheel();
+    translate(servo_pos+[0,0,26]) servowheel();
 
 //translate([0,0,13])
 //projection(cut=true)
@@ -266,6 +273,6 @@ difference()
 //translate([0,0,10])
 %translate([0,0,5])wheel();
         }
-%translate([44.5,0,-doorshieldheight])rotate([0,0,90])servo(model=true); 
+%translate(servo_pos+[0,0,-doorshieldheight])rotate([0,0,90])servo(model=true); 
 }
 }
