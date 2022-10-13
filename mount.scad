@@ -200,7 +200,7 @@ module servowheel()
         {
             linear_extrude(5)
             {
-              gear(number_of_teeth=13, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
+              gear(number_of_teeth=29, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
                 
             }
             translate([0,0,5])cylinder(d=32,h=1);
@@ -211,12 +211,10 @@ module servowheel()
             }
         }
         //#translate([0,0,-2])cylinder(d=6,h=5);
-        translate([0,0,7])cylinder(d=8,h=5);
-        cylinder(d=3,h=10);
-        translate([0,0,-2])
-          linear_extrude(height=5)
-           offset(r=0.25) // clearance for fitting
-             servo_axis();
+        translate([0,0,5])cylinder(d1=10,d2=16,h=1.2);
+        cylinder(d=10,h=10);
+        translate([0,12,4])cylinder(d=3,h=5);
+        translate([0,-12,4])cylinder(d=3,h=5);
     }
 }
 module servowheel_2D(layer=0) {
@@ -249,16 +247,16 @@ module servowheel_2D(layer=0) {
 }
 
 
-!servowheel();
+//servowheel();
 {
-    translate([44.5,0,26]) servowheel();
+   // translate([44.5,0,26]) servowheel();
 
 //translate([0,0,13])
 //projection(cut=true)
 {
     //rotate([90,0,0])
     {
-difference()
+//difference()
 {
     holder();
  //   translate([-1,-1,-2]*5000)cube(10000);
