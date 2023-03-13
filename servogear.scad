@@ -33,3 +33,38 @@ module ServoGear(thickness=7) {
 }
 
 ServoGear();
+
+
+pitch = 200;
+
+
+module wheel()
+{
+
+
+//cloned from https://github.com/urish/trumpet-robot/blob/master/hardware/parts/servo-gear.scad
+//and fitted for https://www.thingiverse.com/thing:2304335/files
+
+
+//translate([35,-0,-20])import("original_gear.stl");
+    difference()
+    {
+        union()
+        {
+            difference(){
+                union(){
+                   translate([0,0,21])rotate([0,0,360/61*$t])linear_extrude(5)gear(number_of_teeth=67, circular_pitch=pitch,flat=true);
+                    translate([0,0,11])cylinder(d=64,h=12);
+                }
+                
+                cylinder(d=62.01,h=20);
+                
+            }
+        translate([0,0,11])cylinder(d=27,h=10);
+        }
+        cube([3,30,100],center=true);
+        
+    }
+}
+
+wheel();

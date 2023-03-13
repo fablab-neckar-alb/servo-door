@@ -1,6 +1,8 @@
-servohalterhoehe = 24;
-servohalterueberstand = 8;
-haltebackuntenbiszahnkranzoben = 16.8;
+include<../OpenScadParts/servos.scad>
+
+
+//servohalterueberstand = 8;
+//haltebackuntenbiszahnkranzoben = 16.8;
 
 plattendicke=4;
 doorshieldheight=10;
@@ -31,91 +33,7 @@ module schliesszylinder(h = 10){
 	}
 }
 
-servo_axis_star_rs = [5.5/2,5.7/2]; // [5.6/2, 5.7/2]
-servo_axis_star_N = 23;
 
-module servo_axis() {
-  N = servo_axis_star_N;
-  rs = servo_axis_star_rs;
-  r1 = rs[0];
-  r2 = rs[1];
-  a = 180/N;
-  star = [for (i=[0:N-1],j=[0,1]) rs[j]*[cos(a*(2*i+j)),sin(a*(2*i+j))]];
-  polygon(points=star);
-}
-
-
-module servo(cutout = false, holdblock=false,model=false) {
-    mitteX = 10.2;
-    mitteY = 10;
-    servoX = 39.5;
-    servoY = 20;
-    servolaenge = 39.5;
-    servohalterlaenge = servolaenge+2*servohalterueberstand;
-    
-	if(cutout)
-	{
-		translate([-mitteX,-mitteY-1,0]) cube([39.5,21,100]);
-		translate([-mitteX -8 + 4 , 5,0]) cylinder(d=3, h=100);
-		translate([-mitteX -8 + 4 ,-5,0]) cylinder(d=3, h=100);
-		translate([55-mitteX -8 - 4  ,5,0]) cylinder(d=3, h=100);
-		translate([55-mitteX -8 - 4 ,-5,0]) cylinder(d=3, h=100);
-        translate([0,-5,41]) cube([100,6,2.5],center=true);
-        translate([0 ,5,41]) cube([100,6,2.5],center=true);
-        translate([0 ,0,20]) rotate([0,-90,0])cylinder(d=5, h=100);
-	}
-    if(holdblock)
-    {
-        difference(){
-            translate([-10.2 -8,-10,0]) cube([servohalterlaenge,20,servohalterhoehe]);
-            translate([-10.2,-10,0]) cube([servolaenge,20,(34.3-25)+servohalterhoehe]);
-			translate([-10.2 -8 + 4 ,5,servohalterhoehe]) cylinder(d=3, h=100);
-            translate([-mitteX -8 + 4 , 5,0]) cylinder(d=3, h=100);
-            translate([-mitteX -8 + 4 ,-5,0]) cylinder(d=3, h=100);
-            translate([55-mitteX -8 - 4  ,5,0]) cylinder(d=3, h=100);
-            translate([55-mitteX -8 - 4 ,-5,0]) cylinder(d=3, h=100);
-        }
-    }
-	if(model)
-	{
-	color("blue") difference() {
-		union() {
-
-            
-            mitteY = 10;
-			translate([-10.2,-10,0]) cube([servolaenge,20,(34.3-25)+servohalterhoehe]);
-			difference(){
-				translate([-10.2 -8,-10,servohalterhoehe]) cube([servohalterlaenge,20,2]);
-				translate([-10.2 -8 + 4 ,5,servohalterhoehe]) cylinder(d=3, h=100);
-				translate([-10.2 -8 + 4 ,-5,servohalterhoehe]) cylinder(d=3, h=100);
-				translate([servohalterlaenge-10.2 -8 - 4  ,5,servohalterhoehe]) cylinder(d=3, h=100);
-				translate([servohalterlaenge-10.2 -8 - 4 ,-5,servohalterhoehe]) cylinder(d=3, h=100);
-			}
-			translate([0,0,(34.3-25)+servohalterhoehe]) {
-				
-					translate([0,0,0]) cylinder(d1=14,d2=11, h=1);
-			}
-
-		}	
-
-
-	}
-	color("white") translate([0,0,10+servohalterhoehe]) {
-		difference() {
-			//cylinder(d=6, h=3+1);
-                        linear_extrude(height=3+1) servo_axis();
-			translate([0,0,1]) cylinder(d=2, h=4);
-		}
-	}
-	}
-}
-
-module housing_mittig(){
-	rotate([0,0,270])translate([200,-120])import("keylock-housing.stl");
-}
-	
-
-pitch = 200;
 
 function servoGearInnerRadius() = 63;
 function servoGearOuterRadius() = 66;
@@ -127,15 +45,12 @@ module wheel()
 //cloned from https://github.com/urish/trumpet-robot/blob/master/hardware/parts/servo-gear.scad
 //and fitted for https://www.thingiverse.com/thing:2304335/files
 
-
-//translate([35,-0,-20])import("original_gear.stl");
     difference()
     {
         union()
         {
             difference(){
                 union(){
-                   translate([0,0,21])rotate([0,0,360/61*$t])linear_extrude(5)gear(number_of_teeth=67, circular_pitch=pitch,flat=true);
                     translate([0,0,11])cylinder(d=64,h=12);
                 }
                 
@@ -170,7 +85,7 @@ difference(){
         cylinder(d=43,h=7);
 		//translate([-19,20,0]) cube([56,25,25]);	
         cylinder(d=35,24);
-        translate([44.5,0,-10])rotate([0,0,90])servo(holdblock=true); 
+        translate([44.5,0,10])rotate([-180,0,90])servo(servoDimensions[0],holdblock=true); 
 	}
     /*translate([0,0,3.001])
     difference()
@@ -181,7 +96,7 @@ difference(){
 	translate([-0,0,3]) cylinder(d=30,22);
 
 	translate([-0,0,-.1])schliesszylinder(5.1);
-	translate([44.5,0,-30])rotate([0,0,90])servo(true); 
+	translate([44.5,0,10])rotate([-180,0,90])servo(servoDimensions[0],cutout=true); 
    // holes for the screws of the actual lock.
    for (p = screw_pos) {
      translate([-p[0],-p[1],-0.01])
@@ -238,13 +153,7 @@ module servowheel_2D(layer=0) {
       linear_extrude(height=3)
         servowheel_2D(layer=l);
 }  
-*offset(r=0.095) {
-  union() {
-    for (l=[0:1])
-      translate([l*30.5,0])
-        servowheel_2D(layer=l);
-  }
-}
+
 
 
 //servowheel();
@@ -259,10 +168,11 @@ module servowheel_2D(layer=0) {
 //difference()
 {
     holder();
+  
  //   translate([-1,-1,-2]*5000)cube(10000);
 }
 //translate([0,0,10])
-//translate([0,0,5])wheel();
+translate([0,0,5])wheel();
         }
 //translate([44.5,0,-doorshieldheight])rotate([0,0,90])servo(model=true); 
 }
