@@ -76,4 +76,32 @@ module door_frame_representative() {
   }
 }
 
-door_frame_representative();
+mountThickness =5;
+lowerforkdistance =32;
+screw_r = 5; // NOTE: made up.
+module mount() {
+  difference(){
+    translate([-50,10,])cube([100,100,raw_base_size[2]+mountThickness]);
+    
+    // part of the door, to illustrate right margin:
+    translate([-raw_base_r,0,-10])
+      cube([raw_base_size[0]+right_margin,raw_base_size[1],10]);
+    color([0.6,0.6,0.6]) union() {
+      // raw base
+      hull() for (i=[0,1])
+        translate([0,i*(raw_base_size[1]-raw_base_r*2)+raw_base_r,0])
+          cylinder(r=raw_base_r,h=raw_base_size[2]);
+      // screw holes (actually filled with screws)
+      for (y=[screw1_y,screw2_y,screw3_y])
+        translate([0,y,-1])
+          cylinder(r=screw_r,h=raw_base_size[2]+mountThickness+2);
+    }
+    // actual lock
+    translate([0,lock_y,0])
+      rotate([0,0,180]) schliesszylinder(h=lock_size[2]);
+  }
+  translate([])
+}
+
+//door_frame_representative();
+mount();
