@@ -2,7 +2,7 @@ blendenlaenge=235;
 blendendicke=24;
 lochabstandzueinander=209;
 lochabstandoben=13;
-lochdicke=5.7;
+lochdicke=6.5;
 blechdicke=3;
 kassettenabstandhinten=4;
 kassettendicke=14;
@@ -20,6 +20,7 @@ montagelochdurchmesser=7.5;
 klinkedurchmesser=21;
 klinkepfadhoehe=15.5;
 rechts=true;
+montagespiel=1;
 montageloecher=[
   [0,klinkeoben,dornmass+horizontalbisklinke],
   [0,klinkeoben,dornmass-horizontalbisklinke],
@@ -30,9 +31,9 @@ montageloecher=[
 module blech(){
   union(){
     translate([0,blendendicke/2])hull(){
-      cylinder(d=blendendicke,h=blechdicke);
+      cylinder(d=blendendicke+montagespiel,h=blechdicke);
       translate([0,blendenlaenge-blendendicke]){
-        cylinder(d=blendendicke,h=blechdicke);
+        cylinder(d=blendendicke+montagespiel,h=blechdicke);
       }
     };
     translate([0,lochabstandoben])cylinder(d=lochdicke,h=10);
@@ -42,7 +43,7 @@ module blech(){
 
 
 module kassette(){
-  cube([kassettendicke,kassettenhoehe,kassettenbreite]);  
+  translate([-montagespiel/2,-montagespiel/2])cube([kassettendicke+montagespiel,kassettenhoehe+montagespiel,kassettenbreite+montagespiel]);  
 }
 
 module schliesszylinder(h = 10){
