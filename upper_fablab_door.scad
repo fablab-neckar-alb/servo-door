@@ -1,3 +1,8 @@
+
+
+
+
+
 // measurements for the upper entrance of the Fablab Neckar-Alb e.V.
 
 hires=false;
@@ -17,6 +22,9 @@ bolt_spacing = 5.4; // between door and bolt space area.
 bolt_x_from_margin = -11.0+2.4; // TODO: just remembered, not noted down.
 bolt_size = [20.5,34.8,[5.2,7.8]]; // actual bolt size; slightly V-shaped
 d_top_sensor_screwholes = 48; // those are two screwholes at the to of the door, that may be used for a door switch.
+doorhandle_lockcylinder_dist_y = 90;
+doorhandle_height = 50;
+doorhandle_r = 13;
 
 // TODO: measure torque for locking/unlocking the door (quite some!).
 
@@ -25,6 +33,7 @@ raw_base_r = raw_base_size[0]/2;
 lock_r = lock_size[0]/2;
 screw3_y = raw_base_size[1]-screw3_y_top;
 lock_y = lock_y_min+lock_size[1]-lock_r;
+abs_doorhandle_y = lock_y + doorhandle_lockcylinder_dist_y;
 
 
 // we cannibalize this from before, because lock cylinders are standardized.
@@ -40,7 +49,7 @@ module schliesszylinder(h = 10, add = 0.1){
 }
 
 module door_frame_representative() {
-  screw_r = 5; // NOTE: made up.
+  screw_r = 7/2; // NOTE: d measuered by eberhard.
   bolt_pos =  [raw_base_r+right_margin+bolt_x_from_margin,20,-20]; // NOTE: made up.
   // part of the door, to illustrate right margin:
   translate([-raw_base_r,0,-2])
@@ -55,6 +64,11 @@ module door_frame_representative() {
       translate([0,y,-1])
         cylinder(r=screw_r,h=raw_base_size[2]+2);
   }
+
+  // doorhandle
+  translate([0,abs_doorhandle_y, 0])
+    cylinder(r=doorhandle_r,h=doorhandle_height);
+
   // actual lock
   translate([0,lock_y,0])
     rotate([0,0,180]) schliesszylinder(h=lock_size[2]);
@@ -76,7 +90,7 @@ module door_frame_representative() {
   }
 }
 
-mountThickness =5;
+mountThickness =7;
 lowerforkdistance =32;
 screw_r = 5; // NOTE: made up.
 module sensorboard(){
@@ -94,32 +108,67 @@ module sensorboard(){
 }
 
 
+
 module mount() {
+  move_x = raw_base_size[0] / 2;
+  move_y = raw_base_size[1];
+  height = raw_base_size[2]+mountThickness;
+  e = 0.01;
+  bluge_r = 30;
   difference(){
-    translate([-50,-50,])cube([100,150,raw_base_size[2]+mountThickness]);
-    
-    // part of the door, to illustrate right margin:
-    translate([-raw_base_r,0,-10])
-      cube([raw_base_size[0]+right_margin,raw_base_size[1],10]);
-    color([0.6,0.6,0.6]) union() {
+    hull(){
+
+    //raw_base_size = [31.7,240,9.8];
+      
+      for(i=[[-move_x,0],[-move_x,move_y],[move_x,move_y],[move_x,0]]){
+        translate(i) sphere(r=raw_base_size[2]+mountThickness);
+      }
+      translate([0,abs_doorhandle_y, 0]) cylinder(r = bluge_r, h = height);
+    }
+    //Remove bacside
+    translate([-move_x-height,-height,-height])
+      cube([move_x*2+2*height,move_y+2*height,height]);
+     // doorhandle
+    translate([0,abs_doorhandle_y, 0])
+      cylinder(r=doorhandle_r,h=doorhandle_height);
+    // cablechannel
+    translate([0,abs_doorhandle_y]){
+
+    }
+    translate([0,abs_doorhandle_y,raw_base_size[2]+mountThickness/2]){
+      rotate([0,0,-50])
+        rotate_extrude(angle = 130, convexity = 10)
+          translate([18, 0, 0])
+            circle(d = 4);
+      translate([-20,15,mountThickness/2-6])cube([40,20,6+e]);
+      translate([10,-30,mountThickness/2-6])cube([5,20,6+e]);
+      translate([-20,-doorhandle_r-35-1,mountThickness/2-6])cube([40,20,6+e]);
+    }
+
+    union() {
       // raw base
       hull() for (i=[0,1])
-        translate([0,i*(raw_base_size[1]-raw_base_r*2)+raw_base_r,0])
-          cylinder(r=raw_base_r,h=raw_base_size[2]);
-      // screw holes (actually filled with screws)
-      for (y=[screw1_y,screw2_y,screw3_y])
-        translate([0,y,-1])
-          cylinder(r=screw_r,h=raw_base_size[2]+mountThickness+2);
+        translate([0,i*(raw_base_size[1]-raw_base_r*2)+raw_base_r,-e])
+          cylinder(r=raw_base_r,h=raw_base_size[2]+e);
+      
     }
+    // screw holes
+    for (y=[screw1_y,screw2_y,screw3_y])
+        translate([0,y,-1]) 
+        cylinder(r=screw_r,h=raw_base_size[2]+mountThickness+2);
     // actual lock
     translate([0,lock_y,0])
-      rotate([0,0,180]) schliesszylinder(h=lock_size[2]);
-    #translate([0,-20,raw_base_size[2]+mountThickness-2])sensorboard();
+      rotate([0,0,180])
+      schliesszylinder(h=lock_size[2]+3);
+    
   }
+
   
   
 }
 
+
+//sensorboard();
 //door_frame_representative();
 mount();
 
