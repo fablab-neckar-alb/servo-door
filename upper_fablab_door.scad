@@ -79,9 +79,24 @@ module door_frame_representative() {
 mountThickness =5;
 lowerforkdistance =32;
 screw_r = 5; // NOTE: made up.
+module sensorboard(){
+  boardwidth = 30;
+  boardheigth = 32;
+  height = 2;
+  
+  diameter = 63.9;
+  translate([-boardwidth/2,0,0])
+  difference(){
+    cube([boardwidth,boardheigth,height]);
+    translate([boardwidth/2,boardheigth+25+3,-1]) cylinder(d=diameter,h=height+2);
+  }
+  
+}
+
+
 module mount() {
   difference(){
-    translate([-50,10,])cube([100,100,raw_base_size[2]+mountThickness]);
+    translate([-50,-50,])cube([100,150,raw_base_size[2]+mountThickness]);
     
     // part of the door, to illustrate right margin:
     translate([-raw_base_r,0,-10])
@@ -99,9 +114,12 @@ module mount() {
     // actual lock
     translate([0,lock_y,0])
       rotate([0,0,180]) schliesszylinder(h=lock_size[2]);
+    #translate([0,-20,raw_base_size[2]+mountThickness-2])sensorboard();
   }
-  translate([])
+  
+  
 }
 
 //door_frame_representative();
 mount();
+
