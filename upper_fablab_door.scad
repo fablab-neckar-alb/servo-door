@@ -1,5 +1,5 @@
-
-
+include <BOSL2/std.scad>
+include <BOSL2/gears.scad>
 
 
 
@@ -26,6 +26,13 @@ doorhandle_lockcylinder_dist_y = 90;
 doorhandle_height = 50;
 doorhandle_r = 13;
 
+zahnradmodul = 2;
+thickness = 6;
+z1=31;
+z2=13;
+dist= (z1+z2)/2*zahnradmodul;
+
+
 // TODO: measure torque for locking/unlocking the door (quite some!).
 
 // not measured, but inferred from measurements:
@@ -34,6 +41,14 @@ lock_r = lock_size[0]/2;
 screw3_y = raw_base_size[1]-screw3_y_top;
 lock_y = lock_y_min+lock_size[1]-lock_r;
 abs_doorhandle_y = lock_y + doorhandle_lockcylinder_dist_y;
+
+
+translate([0,lock_y,25])
+rotate([0,0,90])union(){
+spur_gear(mod=zahnradmodul,teeth=31, thickness=thickness,pressure_angle=20, clearance=0.167);
+  translate([0,dist,0])
+spur_gear(mod=zahnradmodul,teeth=13, thickness=thickness,pressure_angle=20, clearance=0.167);
+}
 
 
 // we cannibalize this from before, because lock cylinders are standardized.
@@ -140,9 +155,13 @@ module mount() {
         rotate_extrude(angle = 130, convexity = 10)
           translate([18, 0, 0])
             circle(d = 4);
-      translate([-20,15,mountThickness/2-6])cube([40,20,6+e]);
-      translate([10,-30,mountThickness/2-6])cube([5,20,6+e]);
-      translate([-20,-doorhandle_r-35-1,mountThickness/2-6])cube([40,20,6+e]);
+      translate([-20,15,mountThickness/2 -6])cube([40,20,6+e]);
+      #translate([10,-40,mountThickness/2-6])cube([5,30,5]);
+      translate([-20,-doorhandle_r-35-1,mountThickness/2-6])
+      difference(){
+        cube([40,30,6+e]);
+        translate([20,-20])      cylinder(d=63.9,h=6+e);
+      }
     }
 
     union() {

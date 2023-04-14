@@ -4,6 +4,9 @@ build_part = undef; // use openscad -D build_part=\"parts_list\" ...
 // build_part = "servowheel_2D";
 // build_part = "holder";
 // build_part = "wheel";
+include <../OpenScadParts/servos.scad>
+use <MCAD/involute_gears.scad>
+
 
 servohalterhoehe = 24;
 servohalterueberstand = 8;
@@ -15,7 +18,7 @@ doorcylinderaddition=5;
 keyaddition=40;
 
 // measurements: topscrew-bottomscrew = 113, topscrew-cylinder = 50, door-screwbase = 7.5
-screw_pos = [[0,50],[0,50-113]];
+screw_pos = [[0,70],[0,-42]];
 screw_r = 6/2;
 // screw_head_r = 12/2;
 // screw_l = 57;
@@ -29,8 +32,6 @@ gears_n2 = 67;
 gears_d = norm(servo_pos);
 modulus = gears_d*2/(gears_n1+gears_n2);
 pitch = 180*modulus;
-
-use <MCAD/involute_gears.scad>
 
 $fn = 60;
 
@@ -66,7 +67,7 @@ module servo_axis() {
   star = [for (i=[0:N-1],j=[0,1]) rs[j]*[cos(a*(2*i+j)),sin(a*(2*i+j))]];
   polygon(points=star);
 }
-
+/*
 module servo(cutout = false, holdblock=false,model=false) {
     mitteX = 10.2;
     mitteY = 10;
@@ -131,7 +132,7 @@ module servo(cutout = false, holdblock=false,model=false) {
 	}
 	}
 }
-
+*/
 module housing_mittig(){
 	rotate([0,0,270])translate([200,-120])import("keylock-housing.stl");
 }
@@ -163,7 +164,7 @@ module wheel()
         {
             difference(){
                 union(){
-                   translate([0,0,21])rotate([0,0,360/61*$t])linear_extrude(5)gear(number_of_teeth=gears_n2, circular_pitch=pitch,flat=true);
+                    translate([0,0,21])rotate([0,0,360/61*$t])linear_extrude(5)gear(number_of_teeth=gears_n2, circular_pitch=pitch,flat=true);
                     translate([0,0,11])cylinder(d=64,h=12);
                 }
 
@@ -179,7 +180,7 @@ module wheel()
 
 }
 
-
+blende = [35,240,11];
 module holder(){
 difference(){
     baseplateheight=3;
@@ -187,19 +188,22 @@ difference(){
 		//cylinder(d=62,h=3);
         //#translate([0,0,baseplateheight/2])cube([32*2,50,baseplateheight],center=true);
         linear_extrude(height=baseplateheight) hull() {
-          square([32*2,50],center=true);
+          square([blende[0]+20,50],center=true);
           for (p = screw_pos) {
             translate(-p)
               circle(r=3*screw_r+baseplateheight);
           }
         }
-        translate([45/2,-25,-10])cube([32,62.3,baseplateheight+10]);
-        translate([-(45/2)-10,-25,-10])cube([10,50,13]);
+        translate([blende[0]/2,-25,-10])cube([32,62.3,baseplateheight+10]);
+        translate([-(blende[0]/2)-10,-25,-10])cube([10,50,13]);
+        translate([blende[0]/2 + 10,-20,-10])cube([27,60,22])
         cylinder(d=43,h=7);
 		//translate([-19,20,0]) cube([56,25,25]);	
         cylinder(d=35,24);
-        translate(servo_pos+[0,0,-10])rotate([0,0,90])servo(holdblock=true); 
+        //translate(servo_pos+[0,0,-10])rotate([0,0,90])servo(holdblock=true); 
+        
 	}
+  translate(servo_pos+[0,0,25])rotate([0,0,90])servo(servoDimensions[0],true,false,false);
     /*translate([0,0,3.001])
     difference()
 	{
