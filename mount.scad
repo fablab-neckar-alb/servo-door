@@ -1,39 +1,39 @@
-build_part = undef; // use openscad -D build_part=\"parts_list\" ...
+// build_part = undef; // use openscad -D build_part=\"parts_list\" ...
 // build_part = "parts_list";
 // build_part = "servowheel";
 // build_part = "servowheel_2D";
-// build_part = "holder";
+build_part = "holder";
 // build_part = "wheel";
 include <../OpenScadParts/servos.scad>
-use <MCAD/involute_gears.scad>
+use <keyGear.scad>;
 
 
 servohalterhoehe = 24;
 servohalterueberstand = 8;
 haltebackuntenbiszahnkranzoben = 16.8;
 
-plattendicke=4;
-doorshieldheight=10;
+baseplateheight=7;
+bearinglift=.3;
+
 doorcylinderaddition=5;
 keyaddition=40;
 
+blende = [35,240,11];
+doorCylinderHeight=9.73+4.22-blende[2];
+
 // measurements: topscrew-bottomscrew = 113, topscrew-cylinder = 50, door-screwbase = 7.5
 screw_pos = [[0,70],[0,-42]];
+hall_screw_pos = [[10,60],[-10,60],[0,45]];
 screw_r = 6/2;
 // screw_head_r = 12/2;
 // screw_l = 57;
 // distance lock-baseplane: 6.2 (that should be baseplateheight)
 //   however: the rest of the geometry does not depend on baseplateheight yet...
 
-servo_pos = [44.5,0,0]; // z-pos is zero on purpose (also different in every instance...)
 
-gears_n1 = 13;
-gears_n2 = 67;
-gears_d = norm(servo_pos);
-modulus = gears_d*2/(gears_n1+gears_n2);
-pitch = 180*modulus;
 
-$fn = 60;
+hires=true;
+$fn = hires ? 120 : 60;
 
 module part(s="") {
   if (build_part == s) children();
@@ -55,215 +55,60 @@ module schliesszylinder(h = 10){
 	}
 }
 
-servo_axis_star_rs = [5.5/2,5.7/2]; // [5.6/2, 5.7/2]
-servo_axis_star_N = 23;
 
-module servo_axis() {
-  N = servo_axis_star_N;
-  rs = servo_axis_star_rs;
-  r1 = rs[0];
-  r2 = rs[1];
-  a = 180/N;
-  star = [for (i=[0:N-1],j=[0,1]) rs[j]*[cos(a*(2*i+j)),sin(a*(2*i+j))]];
-  polygon(points=star);
-}
-/*
-module servo(cutout = false, holdblock=false,model=false) {
-    mitteX = 10.2;
-    mitteY = 10;
-    servoX = 39.5;
-    servoY = 20;
-    servolaenge = 39.5;
-    servohalterlaenge = servolaenge+2*servohalterueberstand;
-
-	if(cutout)
-	{
-		translate([-mitteX,-mitteY-1,0]) cube([39.5,21,100]);
-		translate([-mitteX -8 + 4 , 5,0]) cylinder(d=3, h=100);
-		translate([-mitteX -8 + 4 ,-5,0]) cylinder(d=3, h=100);
-		translate([55-mitteX -8 - 4  ,5,0]) cylinder(d=3, h=100);
-		translate([55-mitteX -8 - 4 ,-5,0]) cylinder(d=3, h=100);
-        translate([0,-5,41]) cube([100,6,2.5],center=true);
-        translate([0 ,5,41]) cube([100,6,2.5],center=true);
-        translate([0 ,0,20]) rotate([0,-90,0])cylinder(d=5, h=100);
-	}
-    if(holdblock)
-    {
-        difference(){
-            translate([-10.2 -8,-10,0]) cube([servohalterlaenge,20,servohalterhoehe]);
-            translate([-10.2,-10,0]) cube([servolaenge,20,(34.3-25)+servohalterhoehe]);
-			translate([-10.2 -8 + 4 ,5,servohalterhoehe]) cylinder(d=3, h=100);
-            translate([-mitteX -8 + 4 , 5,0]) cylinder(d=3, h=100);
-            translate([-mitteX -8 + 4 ,-5,0]) cylinder(d=3, h=100);
-            translate([55-mitteX -8 - 4  ,5,0]) cylinder(d=3, h=100);
-            translate([55-mitteX -8 - 4 ,-5,0]) cylinder(d=3, h=100);
-        }
-    }
-	if(model)
-	{
-	color("blue") difference() {
-		union() {
-
-
-            mitteY = 10;
-			translate([-10.2,-10,0]) cube([servolaenge,20,(34.3-25)+servohalterhoehe]);
-			difference(){
-				translate([-10.2 -8,-10,servohalterhoehe]) cube([servohalterlaenge,20,2]);
-				translate([-10.2 -8 + 4 ,5,servohalterhoehe]) cylinder(d=3, h=100);
-				translate([-10.2 -8 + 4 ,-5,servohalterhoehe]) cylinder(d=3, h=100);
-				translate([servohalterlaenge-10.2 -8 - 4  ,5,servohalterhoehe]) cylinder(d=3, h=100);
-				translate([servohalterlaenge-10.2 -8 - 4 ,-5,servohalterhoehe]) cylinder(d=3, h=100);
-			}
-			translate([0,0,(34.3-25)+servohalterhoehe]) {
-				
-					translate([0,0,0]) cylinder(d1=14,d2=11, h=1);
-			}
-
-		}	
-
-
-	}
-	color("white") translate([0,0,10+servohalterhoehe]) {
-		difference() {
-			//cylinder(d=6, h=3+1);
-                        linear_extrude(height=3+1) servo_axis();
-			translate([0,0,1]) cylinder(d=2, h=4);
-		}
-	}
-	}
-}
-*/
-module housing_mittig(){
-	rotate([0,0,270])translate([200,-120])import("keylock-housing.stl");
-}
-
-module bearing() {
-  // note: sizes not measured, but inferred from actual parts.
-  color([0.2,0.2,0.2])
-    linear_extrude(height=20-7+5) difference() {
-      circle(d=62.01);
-      circle(d=35);
-    }
-}
-
-function servoGearInnerRadius() = 63;
-function servoGearOuterRadius() = 66;
-
-module wheel()
-{
-
-
-//cloned from https://github.com/urish/trumpet-robot/blob/master/hardware/parts/servo-gear.scad
-//and fitted for https://www.thingiverse.com/thing:2304335/files
-
-
-//translate([35,-0,-20])import("original_gear.stl");
-    difference()
-    {
-        union()
-        {
-            difference(){
-                union(){
-                    translate([0,0,21])rotate([0,0,360/61*$t])linear_extrude(5)gear(number_of_teeth=gears_n2, circular_pitch=pitch,flat=true);
-                    translate([0,0,11])cylinder(d=64,h=12);
-                }
-
-                cylinder(d=62.01,h=20);
-
-            }
-        translate([0,0,11])cylinder(d=27,h=10);
-        }
-        cube([3,30,100],center=true);
-
-    }
-
-
-}
-
-blende = [35,240,11];
+servoblockaddition =  14;
+servo = servoTowerProMG996R();
+winkel=50;
+rotierteDistance = [sin(winkel),-cos(winkel),0]*gearDistance();
 module holder(){
-difference(){
-    baseplateheight=3;
-	union(){
-		//cylinder(d=62,h=3);
-        //#translate([0,0,baseplateheight/2])cube([32*2,50,baseplateheight],center=true);
-        linear_extrude(height=baseplateheight) hull() {
-          square([blende[0]+20,50],center=true);
-          for (p = screw_pos) {
-            translate(-p)
-              circle(r=3*screw_r+baseplateheight);
+  totalServoLength = servo[1] + servo[3] * 2;
+  servosCenter = servo[3] + servo[5];
+  difference(){
+    // Base object
+  	union(){
+          linear_extrude(height=baseplateheight) {
+            hull() {
+              //top and bottom mount hole encasement
+              for (screw = screw_pos) {
+                translate(-screw) circle(r=3*screw_r+baseplateheight);
+              }
+              //wide part for connecting the servo
+              rotate([0,0,180])translate([- rotierteDistance[0]+servo[2]/2,-servosCenter - rotierteDistance[1],0])
+              square([0.01,totalServoLength]);
+
+            }
           }
-        }
-        translate([blende[0]/2,-25,-10])cube([32,62.3,baseplateheight+10]);
-        translate([-(blende[0]/2)-10,-25,-10])cube([10,50,13]);
-        translate([blende[0]/2 + 10,-20,-10])cube([27,60,22])
-        cylinder(d=43,h=7);
-		//translate([-19,20,0]) cube([56,25,25]);	
-        cylinder(d=35,24);
-        //translate(servo_pos+[0,0,-10])rotate([0,0,90])servo(holdblock=true); 
-        
-	}
-  translate(servo_pos+[0,0,25])rotate([0,0,90])servo(servoDimensions[0],true,false,false);
-    /*translate([0,0,3.001])
-    difference()
-	{
-        cylinder(d=68,h=20);
-        cylinder(d=43,h=20);
-    }*/
-	translate([-0,0,3]) cylinder(d=30,22);
+          //translate([0,-25,])#cube([32,50,baseplateheight]);
+          cylinder(d=43,h=baseplateheight+bearinglift);
+          cylinder(d=35,h=bearingDimensions()[1]+baseplateheight-1 );  
+  	}
+    
+  	translate([-0,0,3]) cylinder(d=30,40);
+  	translate([-0,0,-.1]) schliesszylinder(baseplateheight+bearinglift+0.2);
+     // holes for the screws of the actual lock.
+     //top and bottom mount hole
+     for (screw = screw_pos) {
+       translate([-screw[0],-screw[1],-0.01])
+         cylinder(r1=screw_r, r2=screw_r+baseplateheight, h=baseplateheight+0.02);
+     }
 
-	translate([-0,0,-.1])schliesszylinder(5.1);
-	translate(servo_pos+[0,0,-30])rotate([0,0,90])servo(true);
-   // holes for the screws of the actual lock.
-   for (p = screw_pos) {
-     translate([-p[0],-p[1],-0.01])
-       cylinder(r1=screw_r, r2=screw_r+baseplateheight, h=baseplateheight+0.02);
-//       cylinder(r=screw_r, h=baseplateheight+2);
-   }
-}
-}
-
-module servowheel()
-{
-   difference()
-    {
-        union()
-        {
-            linear_extrude(5)
-            {
-              gear(number_of_teeth=gears_n1, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
-
-            }
-            translate([0,0,5])cylinder(d=32,h=1);
-
-            translate([0,0,5]) rotate_extrude(convexity = 10) translate([16, 0, 0])
-            {
-                circle(r = 1);
-            }
-        }
-        //#translate([0,0,-2])cylinder(d=6,h=5);
-        translate([0,0,7])cylinder(d=8,h=5);
-        cylinder(d=3,h=10);
-        translate([0,0,-2])
-          linear_extrude(height=5)
-           offset(r=0.25) // clearance for fitting
-             servo_axis();
-    }
-}
-
-module servowheel_2D(layer=0) {
-  if (layer == 0) {
-    difference() {
-      gear(number_of_teeth=gears_n1, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
-      servo_axis();
-    }
-  } else {
-    difference() {
-      circle(d=30);
-      circle(d=3);
-    }
+     for (screw = hall_screw_pos) {
+       translate([-screw[0],-screw[1],-0.01])
+         cylinder(d=4, , h=baseplateheight+0.02);
+     }
   }
 }
+
+
+//translate([0,0,baseplateheight+thickness()+bearingDimensions()[1]+ bearinglift] )rotate([180,0,winkel])  package();
+difference(){
+translate(rotierteDistance+[0,0,operativeHeight(servo)-blende[2]] ){
+  rotate([0,0,-90]) servo(servoTowerProMG996R(),cutout = false, holdblock=true,model=false, mountingscrewidth = 2);
+  };
+  translate([-50,-100,-100])cube([100,100,100]);;
+}
+
+
 
 part("servowheel") translate([0,0,6]) rotate([180,0,0]) servowheel();
 
@@ -292,9 +137,9 @@ demo() {
       holder();
    //   translate([-1,-1,-2]*5000)cube(10000);
   }
-  translate([0,0,5])
-    wheel();
-  translate([0,0,7])
-    bearing();
+  /*translate([0,0,5])
+    wheel();*/
+  /*translate([0,0,7])
+    bearing();*/
   %translate(servo_pos+[0,0,-doorshieldheight])rotate([0,0,90])servo(model=true);
 }
