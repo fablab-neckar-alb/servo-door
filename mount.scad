@@ -4,7 +4,7 @@
 // build_part = "servowheel_2D";
 build_part = "holder";
 // build_part = "wheel";
-include <../OpenScadParts/servos.scad>
+include <OpenScadParts/servos.scad>
 use <keyGear.scad>;
 
 

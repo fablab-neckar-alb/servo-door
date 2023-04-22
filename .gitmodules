@@ -1,0 +1,3 @@
+[submodule "OpenScadParts"]
+	path = OpenScadParts
+	url = git@github.com:waynix/OpenScadParts.git
