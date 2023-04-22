@@ -20,12 +20,14 @@ keyaddition=40;
 
 blende = [35,240,11];
 doorCylinderHeight=9.73+4.22-blende[2];
+minimalBorder=2;
 
 // measurements: topscrew-bottomscrew = 113, topscrew-cylinder = 50, door-screwbase = 7.5
 screw_pos = [[0,70],[0,-42]];
 hall_screw_pos = [[10,60],[-10,60],[0,45]];
-screw_r = 6/2;
-// screw_head_r = 12/2;
+screw_d = 6;
+screw_head_d = 12;
+screw_head_h = 3.3;
 // screw_l = 57;
 // distance lock-baseplane: 6.2 (that should be baseplateheight)
 //   however: the rest of the geometry does not depend on baseplateheight yet...
@@ -47,11 +49,11 @@ module demo() {
 module schliesszylinder(h = 10){
 	length = 33;
 	slotwidth = 10;
-	keycylinderwidth = 17;
+	keycylinderwidth = 17.3;
 	cylinder(d=keycylinderwidth,h);
 	hull(){
-		translate([0,33-slotwidth/2 -keycylinderwidth / 2,0]){cylinder(d=10.1,h);}
-		cylinder(d=10.1,h);
+		translate([0,33-slotwidth/2 -keycylinderwidth / 2,0]){cylinder(d=10.3,h);}
+		cylinder(d=10.3,h);
 	}
 }
 
@@ -61,6 +63,7 @@ servo = servoTowerProMG996R();
 winkel=50;
 rotierteDistance = [sin(winkel),-cos(winkel),0]*gearDistance();
 module holder(){
+  width = hall_screw_pos[0][0]*2 + screw_head_d + minimalBorder;
   totalServoLength = servo[1] + servo[3] * 2;
   servosCenter = servo[3] + servo[5];
   difference(){
@@ -68,10 +71,12 @@ module holder(){
   	union(){
           linear_extrude(height=baseplateheight) {
             hull() {
-              //top and bottom mount hole encasement
-              for (screw = screw_pos) {
-                translate(-screw) circle(r=3*screw_r+baseplateheight);
-              }
+              
+              #translate(-screw_pos[0]) square([width , screw_head_d + minimalBorder*2],center=true);
+              // bottom mount hole encasement
+              
+              translate(-screw_pos[1]) circle(d=width);
+              
               //wide part for connecting the servo
               rotate([0,0,180])translate([- rotierteDistance[0]+servo[2]/2,-servosCenter - rotierteDistance[1],0])
               square([0.01,totalServoLength]);
@@ -88,8 +93,10 @@ module holder(){
      // holes for the screws of the actual lock.
      //top and bottom mount hole
      for (screw = screw_pos) {
-       translate([-screw[0],-screw[1],-0.01])
-         cylinder(r1=screw_r, r2=screw_r+baseplateheight, h=baseplateheight+0.02);
+       translate(-screw){
+         cylinder(d=screw_d, h=baseplateheight);
+         translate([0,0,baseplateheight-screw_head_h+0.02])cylinder(d1=screw_d, d2=screw_head_d, h=screw_head_h);
+       }
      }
 
      for (screw = hall_screw_pos) {

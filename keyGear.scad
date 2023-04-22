@@ -45,10 +45,17 @@ module keygear(dimension = bearingDimensions(),thickness=thickness())
 
 module servoGear(thickness=thickness()){
     servoholeDiameter = 9;
+    servoholeDist = 14.7/2;
+    mountholes = [[servoholeDist,0,-0.01],[-servoholeDist,0,-0.01]];
     difference(){
       translate([0,0,thickness/2])
         spur_gear(mod=modulus, teeth=servoTeeth(), thickness=thickness, pressure_angle=20, clearance=0.167);
       translate([0,0,-1]) cylinder(d=servoholeDiameter,h=thickness+2);
+      for(mounthole=mountholes){
+        translate(mounthole)cylinder(d=2.2,h=thickness+1);
+        translate(mounthole+[0,0,1])cylinder(d=5.5,h=10);
+      }
+      translate([0,0,3])cylinder(d1=14,d2=28,h=10);
     }
 
 }
@@ -66,7 +73,7 @@ module package(){
   translate([0,gearDistance()])servoGear();
 }
 
-package();
+servoGear();
 /*
 module servowheel()
 {
