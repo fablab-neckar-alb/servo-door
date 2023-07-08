@@ -5,6 +5,7 @@
 build_part = "holder";
 // build_part = "wheel";
 include <OpenScadParts/servos.scad>
+include <OpenScadParts/motor-jgy-370.scad>
 use <keyGear.scad>;
 
 
@@ -60,30 +61,33 @@ module schliesszylinder(h = 10){
 
 servoblockaddition =  14;
 servo = servoTowerProMG996R();
-winkel=50;
-rotierteDistance = [sin(winkel),-cos(winkel),0]*gearDistance();
+servosCenter = servo[3] + servo[5];
+winkel=230;
+extraXOffset=(winkel % 360 ) < 180 ? 0: - servo[2];
+extraYOffset=(winkel % 360 ) < 180 ? servosCenter: servo[1]+servo[3]-servo[5] ;
+rotierteDistance = [sin(winkel),-cos(winkel),0]*(gearDistance()-0.2);
 module holder(){
   width = hall_screw_pos[0][0]*2 + screw_head_d + minimalBorder;
   totalServoLength = servo[1] + servo[3] * 2;
-  servosCenter = servo[3] + servo[5];
+  
   difference(){
     // Base object
   	union(){
           linear_extrude(height=baseplateheight) {
             hull() {
               
-              #translate(-screw_pos[0]) square([width , screw_head_d + minimalBorder*2],center=true);
+              translate(-screw_pos[0]) square([width , screw_head_d + minimalBorder*2],center=true);
               // bottom mount hole encasement
-              
               translate(-screw_pos[1]) circle(d=width);
               
               //wide part for connecting the servo
-              rotate([0,0,180])translate([- rotierteDistance[0]+servo[2]/2,-servosCenter - rotierteDistance[1],0])
+              rotate([0,0,180])translate([- rotierteDistance[0]+servo[2]/2 + extraXOffset, - rotierteDistance[1]- extraYOffset,0])
+              
               square([0.01,totalServoLength]);
 
             }
           }
-          //translate([0,-25,])#cube([32,50,baseplateheight]);
+          
           cylinder(d=43,h=baseplateheight+bearinglift);
           cylinder(d=35,h=bearingDimensions()[1]+baseplateheight-1 );  
   	}
@@ -94,8 +98,9 @@ module holder(){
      //top and bottom mount hole
      for (screw = screw_pos) {
        translate(-screw){
-         cylinder(d=screw_d, h=baseplateheight);
-         translate([0,0,baseplateheight-screw_head_h+0.02])cylinder(d1=screw_d, d2=screw_head_d, h=screw_head_h);
+         translate([0,0,-.05])cylinder(d=screw_d, h=baseplateheight+.1);
+         translate([0,0,baseplateheight-screw_head_h])cylinder(d1=screw_d, d2=screw_head_d, h=screw_head_h+.1);
+         translate([0,0,baseplateheight])cylinder(d=screw_head_d, h=.2);
        }
      }
 
@@ -103,21 +108,25 @@ module holder(){
        translate([-screw[0],-screw[1],-0.01])
          cylinder(d=4, , h=baseplateheight+0.02);
      }
+     
   }
+  
 }
 
 
 //translate([0,0,baseplateheight+thickness()+bearingDimensions()[1]+ bearinglift] )rotate([180,0,winkel])  package();
 difference(){
-translate(rotierteDistance+[0,0,operativeHeight(servo)-blende[2]] ){
-  rotate([0,0,-90]) servo(servoTowerProMG996R(),cutout = false, holdblock=true,model=false, mountingscrewidth = 2);
+extraRot = (winkel % 360 ) < 180 ? 0: 180;
+translate(rotierteDistance+[0,0,blende[2]] ){
+  rotate([0,0,90])JGY_370motor();
+  
   };
-  translate([-50,-100,-100])cube([100,100,100]);;
+  #translate([-50,0,-100])cube([100,100,100]);;
 }
 
 
 
-part("servowheel") translate([0,0,6]) rotate([180,0,0]) servowheel();
+part("servowheel") translate([0,0,26]+rotierteDistance) rotate([180,0,0]) servoGear();
 
 part("servowheel_2D") offset(r=0.095) {
   union() {
@@ -128,7 +137,9 @@ part("servowheel_2D") offset(r=0.095) {
 }
 
 part("holder") holder();
-part("wheel") translate([0,0,26]) rotate([180,0,0]) wheel();
+part("wheel") translate([0,0,26]) rotate([180,0,0]) keygear();
+
+
 
 demo() {
   translate(servo_pos+[0,0,26]) {
