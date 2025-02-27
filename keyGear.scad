@@ -6,13 +6,13 @@ modulus = 2;
 clearance = 0.167;
 pressurreAngle = 20;
 keythickness=2.6;
-keywidth=28;
+keywidth=35;
 hires=true;
 $fn = hires ? 120 : 60;
 
 function thickness() = 5;
 function keyTeeth() = 37;
-function servoTeeth() = 13;
+function servoTeeth() = 7;
 
 function gearDistance() = (keyTeeth()+servoTeeth())*modulus/2;
 
@@ -24,8 +24,9 @@ function bearingDimensions() = [
   ];
 
 
-module keygear(dimension = bearingDimensions(),thickness=thickness())
+module keygear(bearing = bearingDimensions(),thickness=thickness(),keyMaxwith=27)
 {
+  headthickness = thickness / 2;
   difference()
   {
     union()
@@ -33,14 +34,42 @@ module keygear(dimension = bearingDimensions(),thickness=thickness())
       difference(){
         union(){
           translate([0,0,thickness/2])spur_gear(mod=modulus,teeth=keyTeeth(), thickness=thickness,pressure_angle=20, clearance=0.167);
-          translate([0,0,thickness]) cylinder(d=64,h=dimension[1]);
+          translate([0,0,0]) cylinder(d=bearing[0]+2,h=bearing[1]+headthickness);
         }
-        translate([0,0,thickness]) cylinder(d=62.01,h=20+1);
+        //material removed for the bearing
+        #translate([0,0,headthickness+1]) cylinder(d=bearing[0]+0.1,h=bearing[1]+0.1);
+        translate([0,0,headthickness]) cylinder(d=bearing[0]+0.1-5,h=bearing[1]+0.1);
       }
-      translate([0,0,thickness])cylinder(d=27,h=10);
+      //inner key driving cylinder
+      translate([0,0,headthickness])cylinder(d=keyMaxwith,h=bearing[1]-2);
     }
     cube([keythickness,keywidth,100],center=true);
   }
+}
+
+module motorGear(thickness=thickness()){
+    transmissionDiameter = 6;
+    transmissionFlangeOffset = 4.4 - transmissionDiameter/2;
+    transmissionRodHeight = 11;
+    difference(){
+      union(){
+      translate([0,0,thickness/2])
+        spur_gear(mod=modulus, teeth=servoTeeth(), thickness=thickness, pressure_angle=20, clearance=0.167);
+        cylinder(d=10,h=thickness);
+      }
+        
+        translate([0,0,-0.2])difference(){
+        cylinder(d=transmissionDiameter,h=transmissionRodHeight+0.4);
+        translate([transmissionFlangeOffset,-transmissionDiameter/2,0])cube([6,6,11]);
+        }
+    
+      
+      
+      
+      
+    
+    }
+
 }
 
 module servoGear(thickness=thickness()){
@@ -72,48 +101,5 @@ module package(){
   keygear();
   translate([0,gearDistance()])servoGear();
 }
-
-servoGear();
-/*
-module servowheel()
-{
-   difference()
-    {
-        union()
-        {
-            linear_extrude(5)
-            {
-              gear(number_of_teeth=gears_n1, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
-
-            }
-            translate([0,0,5])cylinder(d=32,h=1);
-
-            translate([0,0,5]) rotate_extrude(convexity = 10) translate([16, 0, 0])
-            {
-                circle(r = 1);
-            }
-        }
-        //#translate([0,0,-2])cylinder(d=6,h=5);
-        translate([0,0,7])cylinder(d=8,h=5);
-        cylinder(d=3,h=10);
-        translate([0,0,-2])
-          linear_extrude(height=5)
-           offset(r=0.25) // clearance for fitting
-             servo_axis();
-    }
-}
-
-module servowheel_2D(layer=0) {
-  if (layer == 0) {
-    difference() {
-      gear(number_of_teeth=gears_n1, circular_pitch=pitch,flat=true, gear_thickness=10, bore_diameter=3); // setting gear_thickness>rim_thickness removes a warning due to a bug in the involute_gears code.
-      servo_axis();
-    }
-  } else {
-    difference() {
-      circle(d=30);
-      circle(d=3);
-    }
-  }
-}
-*/
+//motorGear();
+keygear();
