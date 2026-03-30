@@ -1,5 +1,6 @@
 include <BOSL2/std.scad>
-include <BOSL2/gears.scad>
+//include <BOSL2/gears.scad>
+
 
 
 modulus = 2;
@@ -15,6 +16,7 @@ function keyTeeth() = 37;
 function servoTeeth() = 7;
 
 function gearDistance() = (keyTeeth()+servoTeeth())*modulus/2;
+use <parametricPulley.scad>
 
 
 function bearingDimensions() = [
@@ -33,11 +35,11 @@ module keygear(bearing = bearingDimensions(),thickness=thickness(),keyMaxwith=27
     {
       difference(){
         union(){
-          translate([0,0,thickness/2])spur_gear(mod=modulus,teeth=keyTeeth(), thickness=thickness,pressure_angle=20, clearance=0.167);
-          translate([0,0,0]) cylinder(d=bearing[0]+2,h=bearing[1]+headthickness);
+          //translate([0,0,thickness/2])spur_gear(mod=modulus,teeth=keyTeeth(), thickness=thickness,pressure_angle=20, clearance=0.167);
+          translate([0,0,0]) cylinder(d=bearing[0]+2,h=15+headthickness);
         }
         //material removed for the bearing
-        #translate([0,0,headthickness+1]) cylinder(d=bearing[0]+0.1,h=bearing[1]+0.1);
+        translate([0,0,headthickness+1]) cylinder(d=bearing[0]+0.1,h=bearing[1]+0.1);
         translate([0,0,headthickness]) cylinder(d=bearing[0]+0.1-5,h=bearing[1]+0.1);
       }
       //inner key driving cylinder
@@ -45,31 +47,41 @@ module keygear(bearing = bearingDimensions(),thickness=thickness(),keyMaxwith=27
     }
     cube([keythickness,keywidth,100],center=true);
   }
+  
+  
+  
+  translate([0,0,5.5]) ppulley();
+  translate([0,0,1.5])difference() 
+  {
+    cylinder(d1=63,d2=67,h=4);
+    translate([0,0,-0.25])cylinder(d=62.5,h=5);
+  }
+}
+
+module keygear_(bearing = bearingDimensions(),thickness=thickness(),keyMaxwith=27)
+{
+  include <parametricPulley.scad>
+  
 }
 
 module motorGear(thickness=thickness()){
-    transmissionDiameter = 6;
+    transmissionDiameter = 6.05;
     transmissionFlangeOffset = 4.4 - transmissionDiameter/2;
     transmissionRodHeight = 11;
     difference(){
       union(){
-      translate([0,0,thickness/2])
-        spur_gear(mod=modulus, teeth=servoTeeth(), thickness=thickness, pressure_angle=20, clearance=0.167);
-        cylinder(d=10,h=thickness);
+      translate([0,0,0])
+//        spur_gear(mod=modulus, teeth=servoTeeth(), thickness=thickness, pressure_angle=20, clearance=0.167);
+        cylinder(d=8,h=8);
       }
         
         translate([0,0,-0.2])difference(){
         cylinder(d=transmissionDiameter,h=transmissionRodHeight+0.4);
         translate([transmissionFlangeOffset,-transmissionDiameter/2,0])cube([6,6,11]);
         }
-    
-      
-      
-      
-      
-    
     }
-
+      
+  include <parametricPulley.scad>
 }
 
 module servoGear(thickness=thickness()){
@@ -101,5 +113,7 @@ module package(){
   keygear();
   translate([0,gearDistance()])servoGear();
 }
+
+
 //motorGear();
-keygear();
+//keygear();
